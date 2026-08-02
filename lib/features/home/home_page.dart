@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../models/post_model.dart';
+import '../../shared/widgets/post_card.dart';
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -13,15 +16,31 @@ class HomePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-      body: const Center(
-        child: Text(
-          '首页',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search),
           ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.chat_bubble_outline),
+          ),
+        ],
+      ),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(12),
+        itemCount: demoPosts.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.68,
         ),
+        itemBuilder: (context, index) {
+          return PostCard(
+            post: demoPosts[index],
+          );
+        },
       ),
     );
   }
