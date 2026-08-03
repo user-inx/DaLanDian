@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 
-/// 应用色彩定义
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF1565C0);
-  static const Color secondary = Color(0xFF42A5F5);
+  static const primary = Color(0xff2563EB);
+
+  static const success = Color(0xff22C55E);
+
+  static const warning = Color(0xffF59E0B);
+
+  static const danger = Color(0xffEF4444);
+
+  static const background = Color(0xffF8FAFC);
+
+  static const card = Colors.white;
+
+  static const textPrimary = Color(0xff111827);
+
+  static const textSecondary = Color(0xff6B7280);
 }
