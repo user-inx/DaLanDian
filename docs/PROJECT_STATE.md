@@ -1,20 +1,32 @@
 # Project State
 
-## 项目
+## Project
 
-大蓝典
+DaLanDian（大蓝典）
 
 ---
 
-## 当前版本
+## Version
 
 v0.0.5
 
 ---
 
-## 当前状态
+## Current Sprint
 
-开发中（MVP）
+Sprint006
+
+---
+
+## Branch
+
+main
+
+---
+
+## Latest Commit
+
+68eec12
 
 ---
 
@@ -24,33 +36,96 @@ v0.0.5
 
 ---
 
-## 已完成
-
-- 项目初始化
-- 企业级目录
-- Bottom Navigation
-- Today 页面
-- Greeting Card
-- Countdown Card
-- Goal 数据模型
-- Life Engine 基础
-
----
-
 ## Analyze
 
 ✅ No issues found
 
 ---
 
-## Git
+## Architecture
 
-main
+Feature First
+
+Riverpod
+
+Repository Pattern
+
+Life Engine
 
 ---
 
-## 下一 Sprint
+## Completed
 
-Sprint006
+### Core
 
-Today MVP
+- Project initialized
+- Enterprise directory
+- Bottom Navigation
+- Theme
+- Base Entity
+
+### Today
+
+- Greeting Card
+- Countdown Card
+- Goal Card
+- Quote Card
+- Progress Card
+- Coach Card
+
+### Life Engine
+
+- Goal Model
+- Goal Repository
+- Mock Repository
+- Goal Planner
+
+### Docs
+
+- PROJECT
+- ROADMAP
+- TECH_STACK
+- ARCHITECTURE
+- CHANGELOG
+
+---
+
+## Next Sprint
+
+Sprint007
+
+Goal Engine
+
+- Goal Planner
+- Goal Tree
+- Goal Repository
+- Goal Provider
+- Goal UI
+
+---
+
+## Long-term Roadmap
+
+Sprint007
+
+Goal Engine
+
+Sprint008
+
+Journey
+
+Sprint009
+
+AI Coach
+
+Sprint010
+
+Authentication
+
+Sprint011
+
+Supabase
+
+Sprint012
+
+Production MVP
