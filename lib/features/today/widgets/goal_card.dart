@@ -7,9 +7,24 @@ import '../../../life_engine/providers/goal_provider.dart';
 class GoalCard extends ConsumerWidget {
   const GoalCard({super.key});
 
-  @override
+    @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goals = ref.watch(goalProvider);
+
+    if (goals.isEmpty) {
+      return Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(20),
+          child: Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
 
     if (goals.isEmpty) {
       return Card(

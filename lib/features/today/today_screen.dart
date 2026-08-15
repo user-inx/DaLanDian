@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../life_engine/models/goal.dart';
 import '../../life_engine/providers/goal_provider.dart';
 
 import 'widgets/greeting_card.dart';
@@ -10,12 +11,32 @@ import 'widgets/progress_card.dart';
 import 'widgets/quote_card.dart';
 import 'widgets/coach_card.dart';
 
-class TodayScreen extends ConsumerWidget {
+class TodayScreen extends ConsumerStatefulWidget {
   const TodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(goalProvider);
+  ConsumerState<TodayScreen> createState() => _TodayScreenState();
+}
+
+class _TodayScreenState extends ConsumerState<TodayScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      ref.read(goalProvider.notifier).loadGoals();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Goal> goals = ref.watch(goalProvider);
+
+    final double totalProgress = _calculateTotalProgress(goals);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -33,8 +54,8 @@ class TodayScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async {
-            await ref.read(goalProvider.notifier).refresh();
+          onRefresh: () {
+            return ref.read(goalProvider.notifier).refresh();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -55,8 +76,7 @@ class TodayScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 ProgressCard(
-                  progressValue:
-                      ref.watch(goalProvider.notifier).totalProgress,
+                  progressValue: totalProgress,
                 ),
 
                 const SizedBox(height: 16),
@@ -74,5 +94,19 @@ class TodayScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  double _calculateTotalProgress(List<Goal> goals) {
+    if (goals.isEmpty) {
+      return 0.0;
+    }
+
+    double total = 0.0;
+
+    for (final Goal goal in goals) {
+      total += goal.progress;
+    }
+
+    return total / goals.length;
   }
 }

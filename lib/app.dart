@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'pages/home/feed_page.dart';  // 导入 FeedPage
 import 'core/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav.dart';
 
@@ -12,7 +12,7 @@ class DaLanDianApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: '大蓝典',
       theme: AppTheme.light,
-      home: const BottomNav(),
+      home: const FeedPage(),  // 改为 FeedPage
     );
   }
 }
