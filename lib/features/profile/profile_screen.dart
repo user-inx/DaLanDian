@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../life_engine/providers/user_profile_provider.dart';
 import 'edit_profile_screen.dart';
+import '../auth/providers/auth_provider.dart';  // ← 新增导入
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -309,7 +310,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SnackBar(content: Text('隐私政策开发中')),
                       );
                     },
+                    showDivider: true,  // ← 改为 true，在退出登录上方显示分割线
+                  ),
+                  // 🔥 新增：退出登录
+                  _buildMenuItem(
+                    icon: Icons.logout_outlined,
+                    title: '退出登录',
+                    onTap: () {
+                      _showSignOutDialog(context);
+                    },
                     showDivider: false,
+                    isDangerous: true,  // ← 新增参数，用于红色样式
                   ),
                 ],
               ),
@@ -382,25 +393,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required String title,
     required VoidCallback onTap,
     required bool showDivider,
+    bool isDangerous = false,  // ← 新增参数
   }) {
     return Column(
       children: [
         ListTile(
           leading: Icon(
             icon,
-            color: Colors.grey.shade700,
+            color: isDangerous ? Colors.red : Colors.grey.shade700,
             size: 22,
           ),
           title: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
-              color: Colors.black87,
+              color: isDangerous ? Colors.red : Colors.black87,
             ),
           ),
           trailing: Icon(
             Icons.chevron_right,
-            color: Colors.grey.shade400,
+            color: isDangerous ? Colors.red.withOpacity(0.5) : Colors.grey.shade400,
           ),
           onTap: onTap,
           contentPadding: const EdgeInsets.symmetric(horizontal: 4),
@@ -451,6 +463,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('知道了'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🔥 新增：退出登录确认对话框
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认登出'),
+        content: const Text('确定要退出登录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // 关闭对话框
+              await ref.read(authProvider.notifier).signOut();
+              // 登出后，app.dart 会自动切换到登录页
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('登出'),
           ),
         ],
       ),

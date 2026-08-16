@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../life_engine/providers/user_profile_provider.dart';
+import '../../life_engine/providers/goal_provider.dart';
 import '../profile/edit_profile_screen.dart';
+import 'widgets/goal_stat_summary.dart';
+import 'widgets/goal_quick_preview.dart';
+import 'goal_list_screen.dart';
+import 'screens/goal_create_screen.dart';  // ← 新增导入
 
 class LifeScreen extends ConsumerStatefulWidget {
   const LifeScreen({super.key});
@@ -13,6 +18,14 @@ class LifeScreen extends ConsumerStatefulWidget {
 
 class _LifeScreenState extends ConsumerState<LifeScreen> {
   late List<Map<String, dynamic>> _milestones;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(goalProvider.notifier).loadGoals();
+    });
+  }
 
   void _buildMilestones(int currentAge) {
     final now = currentAge;
@@ -52,6 +65,9 @@ class _LifeScreenState extends ConsumerState<LifeScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
+    final goals = ref.watch(goalProvider);
+    final isLoading = ref.watch(goalProvider.notifier).isLoading;
+
     _buildMilestones(profile.age);
 
     return Scaffold(
@@ -197,7 +213,7 @@ class _LifeScreenState extends ConsumerState<LifeScreen> {
 
             const SizedBox(height: 16),
 
-            // ---------- 人生节点预览 ----------
+            // ---------- 人生路线图预览 ----------
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -302,7 +318,6 @@ class _LifeScreenState extends ConsumerState<LifeScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // TODO: 跳转到完整路线图
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('路线图详细页面开发中')),
                         );
@@ -310,6 +325,129 @@ class _LifeScreenState extends ConsumerState<LifeScreen> {
                       child: const Text('查看完整路线图 →'),
                     ),
                   ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ---------- 我的目标 ----------
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 标题栏（增加添加按钮）
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.flag_outlined, size: 20, color: Color(0xFF1A73E8)),
+                          SizedBox(width: 8),
+                          Text(
+                            '我的目标',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const GoalCreateScreen(),
+                            ),
+                          ).then((_) {
+                            // 返回时刷新目标列表
+                            ref.read(goalProvider.notifier).loadGoals();
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A73E8),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.add, color: Colors.white, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                '添加',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (isLoading && goals.isEmpty)
+                    const Center(
+                      child: SizedBox(
+                        height: 60,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    )
+                  else if (goals.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        '还没有目标，点击右上角添加吧 🎯',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                    )
+                  else
+                    Column(
+                      children: [
+                        GoalStatSummary(goals: goals),
+                        const SizedBox(height: 12),
+                        ...goals.take(3).map((goal) => GoalQuickPreview(goal: goal)),
+                        if (goals.length > 3)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Center(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const GoalListScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  '查看全部 ${goals.length} 个目标 →',
+                                  style: TextStyle(
+                                    color: const Color(0xFF1A73E8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                 ],
               ),
             ),
