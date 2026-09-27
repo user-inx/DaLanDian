@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/content/comment.dart';
 import '../../../data/models/content/post.dart';
 import '../../home/providers/feed_provider.dart';
+import '../../profile/screens/user_profile_screen.dart';
 import '../providers/comment_provider.dart';
 
 class PostDetailScreen extends ConsumerStatefulWidget {
@@ -38,10 +39,24 @@ class _PostDetailScreenState
     _likesCount = widget.post.likesCount;
   }
 
-  @override
+    @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  void _openAuthorProfile() {
+    if (widget.post.authorId.isEmpty) {
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          userId: widget.post.authorId,
+        ),
+      ),
+    );
   }
 
   Future<void> _toggleLike() async {
@@ -224,26 +239,33 @@ class _PostDetailScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: [
-            const CircleAvatar(
-              radius: 20,
-              child: Icon(
-                Icons.person,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                widget.post.authorName,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+  children: [
+    InkWell(
+      onTap: _openAuthorProfile,
+      borderRadius: BorderRadius.circular(24),
+      child: const CircleAvatar(
+        radius: 20,
+        child: Icon(
+          Icons.person,
+          size: 22,
         ),
+      ),
+    ),
+    const SizedBox(width: 10),
+    Expanded(
+      child: InkWell(
+        onTap: _openAuthorProfile,
+        child: Text(
+          widget.post.authorName,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ),
+  ],
+),
         const SizedBox(height: 20),
         Text(
           widget.post.title,

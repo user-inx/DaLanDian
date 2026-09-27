@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/content/post.dart';
+import '../../profile/screens/user_profile_screen.dart';
 import '../providers/feed_provider.dart';
 
 class PostCard extends ConsumerStatefulWidget {
@@ -22,33 +23,35 @@ class _PostCardState extends ConsumerState<PostCard> {
   bool _liking = false;
 
   Future<void> _toggleLike() async {
-    if (_liking) {
-      return;
-    }
+    if (_liking) return;
 
-    setState(() {
-      _liking = true;
-    });
+    setState(() => _liking = true);
 
     try {
       await ref.read(postLikeControllerProvider).toggleLike(widget.post);
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('点赞操作失败：$e'),
-        ),
+        SnackBar(content: Text('点赞操作失败：$e')),
       );
     } finally {
       if (mounted) {
-        setState(() {
-          _liking = false;
-        });
+        setState(() => _liking = false);
       }
     }
+  }
+
+  void _openAuthorProfile() {
+    if (widget.post.authorId.isEmpty) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          userId: widget.post.authorId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,9 +65,7 @@ class _PostCardState extends ConsumerState<PostCard> {
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
-            bottom: BorderSide(
-              color: Color(0xFFEDEDED),
-            ),
+            bottom: BorderSide(color: Color(0xFFEDEDED)),
           ),
         ),
         child: Column(
@@ -72,20 +73,27 @@ class _PostCardState extends ConsumerState<PostCard> {
           children: [
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 18,
-                  child: Icon(
-                    Icons.person,
-                    size: 20,
+                InkWell(
+                  onTap: _openAuthorProfile,
+                  borderRadius: BorderRadius.circular(20),
+                  child: const CircleAvatar(
+                    radius: 18,
+                    child: Icon(
+                      Icons.person,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    post.authorName,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                  child: InkWell(
+                    onTap: _openAuthorProfile,
+                    child: Text(
+                      post.authorName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -221,8 +229,9 @@ class _LikeActionItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: color,
-                fontWeight:
-                    isLiked ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isLiked
+                    ? FontWeight.w600
+                    : FontWeight.normal,
               ),
             ),
           ],
