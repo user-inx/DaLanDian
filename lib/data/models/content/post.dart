@@ -8,6 +8,7 @@ class Post {
   final int likesCount;
   final int commentsCount;
   final DateTime createdAt;
+  final bool isLiked;
 
   const Post({
     required this.id,
@@ -19,6 +20,7 @@ class Post {
     required this.likesCount,
     required this.commentsCount,
     required this.createdAt,
+    this.isLiked = false,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -33,8 +35,7 @@ class Post {
         final topic = first['topics'];
 
         if (topic is Map<String, dynamic>) {
-          topicName =
-              topic['name']?.toString() ?? '大蓝典';
+          topicName = topic['name']?.toString() ?? '大蓝典';
         }
       }
     }
@@ -42,19 +43,17 @@ class Post {
     return Post(
       id: json['id']?.toString() ?? '',
       authorId: json['author_id']?.toString() ?? '',
-      authorName:
-          json['author_name']?.toString() ?? '大蓝典用户',
+      authorName: json['author_name']?.toString() ?? '大蓝典用户',
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
       topicName: topicName,
-      likesCount:
-          (json['likes_count'] as num?)?.toInt() ?? 0,
-      commentsCount:
-          (json['comments_count'] as num?)?.toInt() ?? 0,
+      likesCount: (json['likes_count'] as num?)?.toInt() ?? 0,
+      commentsCount: (json['comments_count'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.tryParse(
             json['created_at']?.toString() ?? '',
           ) ??
           DateTime.now(),
+      isLiked: json['is_liked'] == true,
     );
   }
 }

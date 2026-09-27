@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/content/comment.dart';
 import '../../../data/models/content/post.dart';
+import '../../home/providers/feed_provider.dart';
 import '../providers/comment_provider.dart';
 
 class PostDetailScreen extends ConsumerStatefulWidget {
@@ -24,11 +25,82 @@ class _PostDetailScreenState
       TextEditingController();
 
   bool _isSubmitting = false;
+  bool _isLiking = false;
+
+  late bool _isLiked;
+  late int _likesCount;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _isLiked = widget.post.isLiked;
+    _likesCount = widget.post.likesCount;
+  }
 
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleLike() async {
+    if (_isLiking) {
+      return;
+    }
+
+    setState(() {
+      _isLiking = true;
+    });
+
+    try {
+      final post = Post(
+        id: widget.post.id,
+        authorId: widget.post.authorId,
+        authorName: widget.post.authorName,
+        title: widget.post.title,
+        content: widget.post.content,
+        topicName: widget.post.topicName,
+        likesCount: _likesCount,
+        commentsCount: widget.post.commentsCount,
+        createdAt: widget.post.createdAt,
+        isLiked: _isLiked,
+      );
+
+      await ref
+          .read(postLikeControllerProvider)
+          .toggleLike(post);
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLiked = !_isLiked;
+
+        if (_isLiked) {
+          _likesCount++;
+        } else if (_likesCount > 0) {
+          _likesCount--;
+        }
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('点赞操作失败：$e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLiking = false;
+        });
+      }
+    }
   }
 
   Future<void> _submitComment() async {
@@ -113,12 +185,12 @@ class _PostDetailScreenState
             child: RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(
-  commentProvider(widget.post.id),
-);
+                  commentProvider(widget.post.id),
+                );
 
-await ref.read(
-  commentProvider(widget.post.id).future,
-);
+                await ref.read(
+                  commentProvider(widget.post.id).future,
+                );
               },
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -213,9 +285,11 @@ await ref.read(
         const SizedBox(height: 12),
         Row(
           children: [
-            _StatItem(
-              icon: Icons.thumb_up_outlined,
-              label: '${widget.post.likesCount}',
+            _LikeStatItem(
+              isLiked: _isLiked,
+              loading: _isLiking,
+              label: '$_likesCount',
+              onTap: _toggleLike,
             ),
             const SizedBox(width: 28),
             _StatItem(
@@ -451,8 +525,7 @@ await ref.read(
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child:
-                          CircularProgressIndicator(
+                      child: CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     )
@@ -488,6 +561,68 @@ await ref.read(
 
     return '${time.year}-${time.month.toString().padLeft(2, '0')}-'
         '${time.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _LikeStatItem extends StatelessWidget {
+  final bool isLiked;
+  final bool loading;
+  final String label;
+  final VoidCallback onTap;
+
+  const _LikeStatItem({
+    required this.isLiked,
+    required this.loading,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isLiked
+        ? Theme.of(context).colorScheme.primary
+        : Colors.grey.shade600;
+
+    return InkWell(
+      onTap: loading ? null : onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 2,
+          vertical: 4,
+        ),
+        child: Row(
+          children: [
+            if (loading)
+              SizedBox(
+                width: 19,
+                height: 19,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: color,
+                ),
+              )
+            else
+              Icon(
+                isLiked
+                    ? Icons.thumb_up
+                    : Icons.thumb_up_outlined,
+                size: 19,
+                color: color,
+              ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontWeight:
+                    isLiked ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

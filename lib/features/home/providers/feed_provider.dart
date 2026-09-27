@@ -15,3 +15,33 @@ final feedProvider =
     tabIndex: tabIndex,
   );
 });
+
+final postLikeControllerProvider = Provider<PostLikeController>(
+  (ref) => PostLikeController(ref),
+);
+
+class PostLikeController {
+  final Ref _ref;
+
+  PostLikeController(this._ref);
+
+  Future<void> toggleLike(Post post) async {
+    final repository = _ref.read(postRepositoryProvider);
+
+    if (post.isLiked) {
+      await repository.unlikePost(
+        postId: post.id,
+      );
+    } else {
+      await repository.likePost(
+        postId: post.id,
+      );
+    }
+
+    // 点赞状态和 likes_count 都由数据库负责维护。
+    // 操作完成后重新读取三个 Feed。
+    _ref.invalidate(feedProvider(0));
+    _ref.invalidate(feedProvider(1));
+    _ref.invalidate(feedProvider(2));
+  }
+}

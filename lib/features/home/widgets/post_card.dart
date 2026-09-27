@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/content/post.dart';
+import '../providers/feed_provider.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends ConsumerStatefulWidget {
   final Post post;
   final VoidCallback? onTap;
 
@@ -13,9 +15,48 @@ class PostCard extends StatelessWidget {
   });
 
   @override
+  ConsumerState<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends ConsumerState<PostCard> {
+  bool _liking = false;
+
+  Future<void> _toggleLike() async {
+    if (_liking) {
+      return;
+    }
+
+    setState(() {
+      _liking = true;
+    });
+
+    try {
+      await ref.read(postLikeControllerProvider).toggleLike(widget.post);
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('点赞操作失败：$e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _liking = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final post = widget.post;
+
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
         decoration: const BoxDecoration(
@@ -95,9 +136,11 @@ class PostCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                _ActionItem(
-                  icon: Icons.thumb_up_outlined,
+                _LikeActionItem(
+                  isLiked: post.isLiked,
+                  loading: _liking,
                   label: '${post.likesCount}',
+                  onTap: _toggleLike,
                 ),
                 const SizedBox(width: 24),
                 _ActionItem(
@@ -116,6 +159,71 @@ class PostCard extends StatelessWidget {
                   color: Colors.grey.shade500,
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LikeActionItem extends StatelessWidget {
+  final bool isLiked;
+  final bool loading;
+  final String label;
+  final VoidCallback onTap;
+
+  const _LikeActionItem({
+    required this.isLiked,
+    required this.loading,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = isLiked
+        ? Icons.thumb_up
+        : Icons.thumb_up_outlined;
+
+    final color = isLiked
+        ? Theme.of(context).colorScheme.primary
+        : Colors.grey.shade600;
+
+    return InkWell(
+      onTap: loading ? null : onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 4,
+          horizontal: 2,
+        ),
+        child: Row(
+          children: [
+            if (loading)
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: color,
+                ),
+              )
+            else
+              Icon(
+                icon,
+                size: 18,
+                color: color,
+              ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight:
+                    isLiked ? FontWeight.w600 : FontWeight.normal,
+              ),
             ),
           ],
         ),
