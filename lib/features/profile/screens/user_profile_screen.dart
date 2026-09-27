@@ -1,5 +1,3 @@
-// lib/features/profile/screens/user_profile_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,20 +19,7 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   final SupabaseService _supabase = SupabaseService();
 
-  late final Future<Map<String, dynamic>?> _profileFuture;
-
   bool _isSubmitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _profileFuture = _supabase.client
-        .from('profiles')
-        .select('id, nickname, avatar_url')
-        .eq('id', widget.userId)
-        .maybeSingle();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,38 +27,32 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     final isCurrentUser =
         currentUserId != null && currentUserId == widget.userId;
 
+    final profileAsync = ref.watch(userProfileProvider(widget.userId));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('个人主页'),
       ),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _profileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('加载失败：${snapshot.error}'),
-            );
-          }
-
-          final profile = snapshot.data;
-
+      body: profileAsync.when(
+        loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        error: (error, stackTrace) {
+          return Center(
+            child: Text('加载失败：$error'),
+          );
+        },
+        data: (profile) {
           if (profile == null) {
             return const Center(
               child: Text('用户不存在'),
             );
           }
 
-          final nickname = (profile['nickname'] as String?)?.trim();
-          final avatarUrl = profile['avatar_url'] as String?;
-
-          final displayName =
-              (nickname == null || nickname.isEmpty) ? '用户' : nickname;
+          final displayName = profile.nickname;
+          final avatarUrl = profile.avatarUrl;
 
           return Padding(
             padding: const EdgeInsets.all(24),
