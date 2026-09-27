@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gotrue/gotrue.dart' as gotrue;
 import '../../../core/services/supabase_service.dart';
 
 /// Auth 状态枚举
@@ -55,7 +54,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     // 2. 监听 Auth 状态变化
     // ✅ 关键：使用 gotrue.AuthState 明确类型
-    _supabase.onAuthStateChange.listen((gotrue.AuthState authState) {
+    _supabase.onAuthStateChange.listen((authState) {
       final session = authState.session;
       final user = session?.user;
       if (user != null) {
