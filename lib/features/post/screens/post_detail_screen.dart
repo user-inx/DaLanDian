@@ -2,40 +2,38 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/content/post.dart';
 
-class PostCard extends StatelessWidget {
+class PostDetailScreen extends StatelessWidget {
   final Post post;
-  final VoidCallback? onTap;
 
-  const PostCard({
+  const PostDetailScreen({
     super.key,
     required this.post,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            bottom: BorderSide(
-              color: Color(0xFFEDEDED),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          '帖子',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
           ),
         ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 const CircleAvatar(
-                  radius: 18,
+                  radius: 20,
                   child: Icon(
                     Icons.person,
-                    size: 20,
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -43,46 +41,40 @@ class PostCard extends StatelessWidget {
                   child: Text(
                     post.authorName,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.more_horiz,
-                  color: Colors.grey.shade500,
-                ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             Text(
               post.title,
               style: const TextStyle(
-                fontSize: 17,
+                fontSize: 23,
                 fontWeight: FontWeight.bold,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 7),
+            const SizedBox(height: 16),
             Text(
               post.content,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-                height: 1.6,
+                fontSize: 16,
+                color: Colors.grey.shade800,
+                height: 1.8,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
+                horizontal: 9,
+                vertical: 5,
               ),
               decoration: BoxDecoration(
                 color: const Color(0xFFF2F4F7),
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 '# ${post.topicName}',
@@ -92,28 +84,19 @@ class PostCard extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 28),
+            const Divider(),
             const SizedBox(height: 12),
             Row(
               children: [
-                _ActionItem(
+                _StatItem(
                   icon: Icons.thumb_up_outlined,
                   label: '${post.likesCount}',
                 ),
-                const SizedBox(width: 24),
-                _ActionItem(
+                const SizedBox(width: 28),
+                _StatItem(
                   icon: Icons.chat_bubble_outline,
                   label: '${post.commentsCount}',
-                ),
-                const SizedBox(width: 24),
-                const _ActionItem(
-                  icon: Icons.bookmark_border,
-                  label: '收藏',
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.share_outlined,
-                  size: 19,
-                  color: Colors.grey.shade500,
                 ),
               ],
             ),
@@ -124,11 +107,11 @@ class PostCard extends StatelessWidget {
   }
 }
 
-class _ActionItem extends StatelessWidget {
+class _StatItem extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _ActionItem({
+  const _StatItem({
     required this.icon,
     required this.label,
   });
@@ -139,14 +122,14 @@ class _ActionItem extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 18,
+          size: 19,
           color: Colors.grey.shade600,
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             color: Colors.grey.shade600,
           ),
         ),

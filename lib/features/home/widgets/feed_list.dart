@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../post/screens/post_detail_screen.dart';
 import '../providers/feed_provider.dart';
 import 'post_card.dart';
 
@@ -70,12 +71,16 @@ class FeedList extends ConsumerWidget {
               final post = posts[index];
 
               return PostCard(
-                username: post.authorName,
-                title: post.title,
-                content: post.content,
-                topic: post.topicName,
-                likes: post.likesCount,
-                comments: post.commentsCount,
+                post: post,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => PostDetailScreen(
+                        post: post,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
